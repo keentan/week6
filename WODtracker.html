@@ -1,0 +1,212 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+
+    <title>WOD Tracker</title>
+    <style type="text/css">
+      .box {
+        border: black 1px solid;
+        text-align: center;
+        padding: 1em;
+        width: 50%;
+        background: lightgrey;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1 class="text-center">WOD Tracker</h1>
+    <div class="card bg-light p-3 m-3">
+    <h1 class="mt-5">Add new Workout of the Day</h1>
+          <div class="mb-3">
+             <label for="name" class="form-label">Exercise Name</label>
+            <input type="text" class="form-control" id="name">
+          </div>
+          <div class="mb-3">
+             <label for="description" class="form-label">Exercise Description</label>
+            <input type="text" class="form-control" id="description">
+          </div>
+          <div class="mb-3">
+             <label for="assignee" class="form-label">Assignee</label>
+            <input type="text" class="form-control" id="assignee">
+          </div>
+          <label for="difficultySelect" class="form-label">Difficulty</label>
+          <select class="form-select" aria-label="Default select example" id="difficulty">
+             <option selected>Difficulty</option>
+                <option>Easy</option>
+                <option>Medium</option>
+                <option>Difficult</option>
+            </select>
+    <button type="submit" class="btn btn-primary mt-3" id='add-Pressed'>Add</button>
+  </div>
+</div>
+
+    <div class="container">
+    <div class="card m-3 p-3 bg-light" hidden="true" id="tablesection">
+      <h3>The WODS</h3>
+    <table class="table table-bordered table-striped table-hover">
+            <thead>
+              <tr>
+                <th>Exercise Name</th>
+                <th>Exercise Description</th>
+                <th>Assignee</th>
+                <th>Difficulty</th>
+              </tr>
+            </thead>
+          <tbody id="wodelement">
+          </tbody>
+    </table>
+  </div> 
+</div>
+
+    <div class="box card container" hidden="true" id="detailsection">
+      <p>Exercise Name : <span id="namedetail"></span></p>
+      <p>Exercise Description : <span id="descdetail"></span></p>
+      <p>Assignee : <span id="assigneedetail"></span></p>
+      <p>Difficulty : <span id="difficultydetail"></span></p>
+      <p>Status : <span id="statusdetail"></span></p>
+      <button type="button" class="btn btn-primary" id="mark">Mark as Done</button>
+      <button type="button" class="btn btn-danger" id="delete-Pressed">Delete</button>
+    </div>
+
+
+    <script type="text/javascript">
+      var wods=[];
+      var selectedItem;
+
+      // Execute the function
+      loadData();
+
+      // Function definition
+      function loadData() {
+        if (localStorage.getItem('wods') !=null) {
+          wods = JSON.parse(localStorage.getItem("wods"));
+          refreshTable();
+        }
+      }
+      function markDonePressed() {
+          selectedItem.status = "Done";
+          document.getElementById("statusdetail").innerHTML="Done";
+          localStorage.setItem('wods',JSON.stringify(wods));
+      }
+
+      function deletePressed(){
+        // In module 3, you will learn the simplified version of this 
+        for (var i=0; i < wods.length; i++) {
+          if (selectedItem.name == wods[i].name) {
+            wods.splice(i,1);
+            break;
+          }
+        }
+        selectedItem = null
+        localStorage.setItem('wods',JSON.stringify(wods));
+        refreshTable();
+        document.getElementById("detailsection").setAttribute("hidden",true);
+
+      }
+
+      function refreshTable() {
+        // Create the function refresh table that will create the table from the array wods
+
+
+        // clear the child first
+        document.getElementById("wodelement").innerHTML="";
+
+        if (wods.length > 0) {
+          document.getElementById("tablesection").removeAttribute("hidden");
+        }
+        else {
+          document.getElementById("tablesection").setAttribute("hidden", true);
+        }
+
+        for (var i = 0; i < wods.length; i++) {
+
+        var td1 = document.createElement("td");
+        var td2 = document.createElement("td");
+        var td3 = document.createElement("td");
+        var td4 = document.createElement("td");
+
+        td1.innerHTML = wods[i].name;
+        td2.innerHTML = wods[i].description;
+        td3.innerHTML = wods[i].assignee;
+        td4.innerHTML = wods[i].difficulty;
+
+        var newTr = document.createElement("tr");
+
+        // complete the rest
+        newTr.appendChild(td1);
+        newTr.appendChild(td2);
+        newTr.appendChild(td3);
+        newTr.appendChild(td4);
+        
+        document.getElementById("wodelement").appendChild(newTr);
+
+        newTr.selectedItem = wods[i];
+        
+        newTr.addEventListener("click", function(evt) {
+          document.getElementById("detailsection").removeAttribute("hidden")
+        selectedItem = evt.currentTarget.selectedItem;
+
+          document.getElementById("namedetail").innerHTML = selectedItem.name;
+          document.getElementById("descdetail").innerHTML = selectedItem.description;
+          document.getElementById("assigneedetail").innerHTML = selectedItem.assignee;
+          document.getElementById("difficultydetail").innerHTML = selectedItem.difficulty;
+          document.getElementById("statusdetail").innerHTML = selectedItem.status;
+        }) 
+      }  
+        // Clear the input everytime after the item is added inside the table
+
+        document.getElementById("name").value="";
+        document.getElementById("description").value="";
+        document.getElementById("assignee").value="";
+        document.getElementById("difficulty").value="";
+
+      }
+
+      function addPressed() {
+        var name = document.getElementById("name").value;
+
+        var description = document.getElementById("description").value;
+
+        var assignee = document.getElementById("assignee").value;  
+
+        var difficulty = document.getElementById("difficulty").value;    
+
+
+        var newItem = {
+          "name":name,
+          "description":description,
+          "assignee":assignee,
+          "difficulty":difficulty,
+          "status":"not done"
+        }
+        wods.push(newItem);
+        // code to save data, first parameter is the filename, second is the data to be saved
+        localStorage.setItem('wods',JSON.stringify(wods));
+        refreshTable();
+      }
+        
+        document.getElementById('add-Pressed').addEventListener('click', addPressed);
+        document.getElementById('mark').addEventListener('click', markDonePressed);
+         document.getElementById('delete-Pressed').addEventListener('click', deletePressed);
+    
+    </script>
+
+    Optional JavaScript; choose one of the two! -->
+
+    <!-- Option 1: Bootstrap Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+
+    <!-- Option 2: Separate Popper and Bootstrap JS -->
+    <!--
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js" integrity="sha384-IQsoLXl5PILFhosVNubq5LC7Qb9DXgDA9i+tQ8Zj3iwWAwPtgFTxbJ8NT4GN1R8p" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.min.js" integrity="sha384-cVKIPhGWiC2Al4u+LWgxfKTRIcfu0JTxR+EQDz/bgldoEyl4H0zUF0QKbrJ0EcQF" crossorigin="anonymous"></script>
+    -->
+  </body>
+</html>
